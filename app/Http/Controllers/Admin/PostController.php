@@ -10,7 +10,8 @@ use App\Category;
 use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
-{
+{   
+    //validazioni
     protected $validationRule = [
         "title" => "required|string|max:100",
         "content" => "required",
@@ -57,28 +58,16 @@ class PostController extends Controller
 
         //creazione post
         $data = $request->all();
-
         $newPost = new Post();
-        $newPost->title = $data["title"];
-        $newPost->content = $data["content"];
+        $newPost->fill($data);
 
+        // $newPost->published = isset($data["published"]);
         if (isset($data["published"]) ) {
             $newPost->published = true;
         }
-        // $newPost->published = isset($data["published"]);
 
-        $newPost->category_id = $data["category_id"];
+        $newPost->slug = $this->getSlug($newPost->title);
 
-        $slug = Str::of($newPost->title)->slug('-');
-        $count = 1;
-        
-        //prendi il primo post il cui slug è uguale a $slug
-        //se è presente allora genero un nuovo slug aggiungendo -$count
-        while(Post::where("slug", $slug)->first() ) {
-            $slug = Str::of($newPost->title)->slug('-') . "-{$count}";
-            $count++;
-        }
-        $newPost->slug = $slug;
 
         //salvo l'immagine se è presente
         if(isset($data["image"])) {
@@ -127,7 +116,7 @@ class PostController extends Controller
     {
         //validazione dati
         $request->validate($this->validationRule);
-
+        
         //modifca post
         $data = $request->all();
 
@@ -137,24 +126,19 @@ class PostController extends Controller
             //nuovo slug
             $slug = Str::of($post->title)->slug('-');
             if($slug != $post->slug){
-                $count = 1;
-                while(Post::where("slug", $slug)->first() ) {
-                    $slug = Str::of($post->title)->slug('-') . "-{$count}";
-                    $count++;
-                }
-                $post->slug = $slug;
+                $post->slug = $this->getSlug($post->title);
             }
         }
-        $post->content = $data["content"];
         
+        // $post->published = isset($data["published"]);
         if (isset($data["published"]) ) {
             $post->published = true;
         } else {
             $post->published = false;
         }
-        // $post->published = isset($data["published"]);
 
-        $post->category_id = $data["category_id"];
+        $post->fill($data);
+
 
         //salvo l'immagine se è presente e cancello la vecchia immagine
         if(isset($data["image"])) {
@@ -190,4 +174,19 @@ class PostController extends Controller
 
         return redirect()->route("posts.index");
     }
+
+    //funzione per generare lo slug
+    private function getSlug($title)
+    {
+        $slug = Str::of($title)->slug('-');
+        $count = 1;
+        
+        //prendi il primo post il cui slug è uguale a $slug
+        //se è presente allora genero un nuovo slug aggiungendo -$count
+        while(Post::where("slug", $slug)->first() ) {
+            $slug = Str::of($title)->slug('-') . "-{$count}";
+            $count++;
+        }
+        return $slug;
+    } 
 }
