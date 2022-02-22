@@ -18,7 +18,8 @@ class PostController extends Controller
         "content" => "required",
         "published" => "sometimes|accepted",
         "category_id" => "nullable|exists:categories,id",
-        "image" => "nullable|image|max:2048|mimes:jpeg,bmp,png"
+        "image" => "nullable|image|max:2048|mimes:jpeg,bmp,png",
+        "tags" => "nullable|exists:tags,id"
     ];
 
 
@@ -60,6 +61,7 @@ class PostController extends Controller
 
         //creazione post
         $data = $request->all();
+        
         $newPost = new Post();
         $newPost->fill($data);
 
@@ -78,6 +80,11 @@ class PostController extends Controller
         }
 
         $newPost->save();
+
+        //aggiungo i tags alla tabella pivot
+        if(isset($data["tags"])) {
+            $newPost->tags()->sync($data["tags"]);
+        }
 
         //redirect al post creato
         return redirect(route("posts.show", $newPost->id));
@@ -103,8 +110,9 @@ class PostController extends Controller
     public function edit(Post $post)
     {
         $categories = Category::all();
+        $tags = Tag::all();
 
-        return view("admin.posts.edit", compact("post", "categories"));
+        return view("admin.posts.edit", compact("post", "categories", "tags"));
     }
 
     /**
@@ -154,6 +162,10 @@ class PostController extends Controller
         
         $post->save();
 
+        //aggiungo i tags alla tabella pivot
+        if(isset($data["tags"])) {
+            $post->tags()->sync($data["tags"]);
+        }
 
         //redirect al post modificato
         return redirect(route("posts.show", $post->id));

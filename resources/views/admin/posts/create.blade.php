@@ -29,7 +29,7 @@
                         <div class="form-group">
                             <label for="category">Categoria</label>
                             <select class="custom-select @error('category_id') is-invalid @enderror" name="category_id" id="category">
-                                <option value=""}}>Seleziona una categoria</option>
+                                <option value="">Seleziona una categoria</option>
                                 @foreach ($categories as $category) {
                                     <option value="{{$category->id}}" {{old("category_id") == $category->id ? "selected" : ""}}>{{$category->name}}</option>
                                 }
@@ -43,11 +43,14 @@
                             <p>Tags</p>
                                 @foreach ($tags as $tag)
                                     <div class="form-check form-check-inline">
-                                        <input type="checkbox" class="form-check-input " id="{{$tag->slug}}" name="tags[]" value="{{$tag->id}}">
+                                        <input type="checkbox" class="form-check-input" id="{{$tag->slug}}" name="tags[]" value="{{$tag->id}}" {{in_array($tag->id,old("tags", [])) ? 'checked' : ''}}>
                                         <label class="form-check-label" for="{{$tag->slug}}">{{$tag->name}}</label>
+                                        @error('tags')
+                                            <div class="alert alert-danger">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 @endforeach
-                        </div>
+                        </div> 
                         <div class="form-group form-check">
                             <input type="checkbox" class="form-check-input @error('published') is-invalid @enderror" id="published" name="published" {{old('published') ? "checked" : ""}}>
                             <label class="form-check-label" for="published">Pubblica</label> 

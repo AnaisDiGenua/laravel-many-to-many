@@ -10,9 +10,12 @@
                 </div>
 
                 <div class="card-body">
+                    {{-- slug --}}
                     <div>
                         Slug : {{$category->slug}}
                     </div>
+
+                    {{-- azioni --}}
                     <div class="mt-4 d-flex">
                         {{-- bottone modifica --}}
                         <a href="{{route("categories.edit", $category->id)}}"><button type="button" class="btn btn-warning mr-2">modifica</button></a>
@@ -23,6 +26,8 @@
                             <button type="submit" class="btn btn-danger">elimina</button>
                         </form>
                     </div>
+
+                    {{-- post associati --}}
                     @if (count($category->posts) > 0 )
                         <div class="mt-5">
                             Post associati: 
